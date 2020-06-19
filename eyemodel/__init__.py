@@ -126,6 +126,7 @@ class Renderer():
         self.cornea_refractive_index = 1.336
 
         self.pupil_radius = 4/2
+        self.pupil_centre = [0,0,0]
 
         self.camera_position = None
         self.camera_target = None
@@ -207,7 +208,7 @@ class Renderer():
                 "input_eye_cornea_refrative_index": self.cornea_refractive_index,
 
                 "input_pupil_radius": self.pupil_radius,
-
+                
                 "input_cam_pos": "Vector({})".format(list(self.camera_position)),
                 "input_cam_target": "Vector({})".format(list(self.camera_target)),
                 "input_cam_up": "Vector({})".format(list(self.camera_up)),

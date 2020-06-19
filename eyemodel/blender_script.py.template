@@ -1,6 +1,7 @@
 # DO NOT TRY TO RUN THIS FILE, IT ONLY RUNS IN BLENDER
 
 import bpy
+import bpy_extras
 import math
 import mathutils
 import os
@@ -9,6 +10,8 @@ import functools
 import collections
 import random
 from mathutils import Vector, Matrix
+from math import tan
+
 try:
     import numpy as np
 except:
@@ -265,12 +268,30 @@ compositing_tree.nodes["Shot Noise"].inputs[0].default_value[1] = cam_rand.unifo
 scene.update()
 
 # Use CUDA if possible
-if input_use_cuda and bpy.context.user_preferences.system.compute_device_type != 'CUDA':
+if input_use_cuda and bpy.context.user_preferences.addons['cycles'].preferences.compute_device_type != 'CUDA':
     try:
         print("Trying to set compute device to CUDA")
         bpy.context.user_preferences.system.compute_device_type = 'CUDA'
     except:
         print("Warning: Setting compute device to CUDA failed, using CPU rendering (will be much slower)")
+
+'''
+eyeL_mesh = eyeL.to_mesh(scene, True, 'RENDER')
+def isPupil(vertex):
+    for g in vertex.groups:
+        if g.group == pupilGroup.index and g.weight == 1.0:
+            return True
+
+pupilRealVertices = [eyeL.matrix_world * Vector((v.co.x, v.co.y, v.co.z, 1)) for v in eyeL_mesh.vertices if isPupil(v)]
+
+# projected pupils ellipse coordinates
+ellipse_coords = []
+
+verts = pupilRealVertices
+coords_2d = [bpy_extras.object_utils.world_to_camera_view(scene, camera_obj, coord) for coord in verts]
+for coord in coords_2d:
+    ellipse_coords.append([1-coord[1], coord[0]])
+'''
 
 if output_params_path:
     def mlabVec(vec):
@@ -334,6 +355,7 @@ if output_params_path:
             "pupil_vertices = [ " + ";".join(" ".join(str(x) for x in world_to_input(v)) + " 1" for v in pupilRealVertices) + "]';"
             "",
         ]
+        
         lines += [
             "figure(1)",
             "clf;",
@@ -397,6 +419,17 @@ if output_params_path:
             "pupil_points = pupil_points(:, convhull(pupil_points(1,:)', pupil_points(2,:)'));",
             "plot(camera.resolution(1)/2 + pupil_points(1,:), camera.resolution(2)/2 - pupil_points(2,:), '-m', 'LineWidth', 1.5);",
         ]
+        lines += [
+        	"points=[(1/2 + pupil_points(1,:)/camera.resolution(1)); (1/2 - pupil_points(2,:)/camera.resolution(2))];",
+			"n=size(points(1,:), 2);",
+			"fprintf('[');",
+			"for i=1:n-1",
+			"	fprintf('[%f, %f], ', points(1,i), points(2,i));",
+			"end",
+			"fprintf('[%f, %f]]', points(1,n), points(2,n));",
+			"fprintf('\\n');",
+			"",
+		]
         for i,light in enumerate(input_lights):
             lines += [
                 "if ~isempty(cr{i})".format(i=i),
