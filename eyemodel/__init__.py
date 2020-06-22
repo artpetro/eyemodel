@@ -35,6 +35,8 @@ RENDER_LINE_RE = re.compile(r"""
         Peak \s* (?P<mempeak>[\d.]+\S)              # Peak memory
         \)
     \s*\|\s*
+    Time: \s* (?P<time>[\d:.]+)                 # Remaining time
+    \s*\|\s*
     Remaining: \s* (?P<rem>[\d:.]+)                 # Remaining time
     \s*\|\s*
     Mem: \s* (?P<mem2>[\d.]+\S) \s*,\s*             # More memory use?

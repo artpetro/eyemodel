@@ -78,25 +78,28 @@ def createFrames(frame_name, gaze_target, render_samples):
 x_eye, y_eye, z_eye = 0, -1000, 0
 
 # create two frames with given target
-if len(sys.argv) == 6:
+if len(sys.argv) == 7:
     frame_name = sys.argv[1]
-    x_eye = int(sys.argv[2])
-    y_eye = int(sys.argv[3])
-    z_eye = int(sys.argv[4])
-    render_samples = int(sys.argv[5])
+    output_dir = sys.argv[2]
+    x_eye = int(sys.argv[3])
+    y_eye = int(sys.argv[4])
+    z_eye = int(sys.argv[5])
+    render_samples = int(sys.argv[6])
     
-    createFrames(frame_name, [x_eye, y_eye, z_eye], render_samples)
+    createFrames(f"{output_dir}/{frame_name}", [x_eye, y_eye, z_eye], render_samples)
 
 # creates frames from file
-if len(sys.argv) == 4:
+if len(sys.argv) == 6:
     input_file = sys.argv[1]
     output_dir = sys.argv[2]
     render_samples = int(sys.argv[3])
+    start_frame = int(sys.argv[4])
+    end_frame = int(sys.argv[5])
     
     with open(input_file, 'r', newline='') as tsvfile:
         reader = csv.reader(tsvfile, delimiter='\t')
-        for row in reader:
-            if len(row) == 4:
+        for i, row in enumerate(reader):
+            if len(row) == 4 and i >= start_frame and i <= end_frame:
                 frame_name = row[0]
                 x_eye = float(row[1])
                 y_eye = float(row[2])
