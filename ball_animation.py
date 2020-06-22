@@ -2,7 +2,8 @@ from gpanel import *
 import time
 import math
 import copy
-from mindq.eyetrax import Measurement, Stream, TimestampStream, TimeMapping
+import csv
+from mindq.eyetrax import Measurement, Stream
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -103,10 +104,9 @@ def getEyePositionsMs(positions):
         dx = x_next - x_curr
         dy = y_next - y_curr
         distance = math.sqrt(dx**2 + dy**2)
-        if distance > 0 and distance < 10:
+        if distance > 0:
             steps = int(distance / EYE_SPEED)
-            print(f"{i} : {distance} : {steps}")
-            
+            #print(f"{i} : {distance} : {steps}")
             if steps > 0:
                 ddx = dx / steps
                 ddy = dy / steps
@@ -118,18 +118,19 @@ def getEyePositionsMs(positions):
     return eye_positions
     
 positions = readBallPositions(path)
-'''
-eye_positions = []
-# fill with timestamps 200 fps
-total_frames = int((positions[-1][0] - positions[0][0]) * FPS)
-for i in range(total_frames):
-    eye_positions.append([i])
-    
-print(positions[-1][0] - positions[0][0])
-print(len(eye_positions))
-print(len(positions))
-'''
 positions_ms = getBallPositionsMs(positions)     
 eye_positions_ms = getEyePositionsMs(positions_ms)
-eye_positions = eye_positions_ms[0::5]
-drawEyePositions(eye_positions, interval=MS_PER_FRAME)
+eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
+print(len(eye_positions))
+#drawEyePositions(eye_positions, interval=MS_PER_FRAME)
+output_file = 'frames.tsv'
+
+if len(sys.argv) == 2:
+    output_file = sys.argv[1]
+    
+with open(output_file, 'wt', newline='') as out_file:
+    tsv_writer = csv.writer(out_file, delimiter='\t')
+    for i, eye_position in enumerate(eye_positions):
+        #negate x for compatibility with eye model coordinates system
+        tsv_writer.writerow([f"frame_{i}", -eye_position[0]*1000, eye_position[1]*1000, eye_position[2]*1000])
+    
