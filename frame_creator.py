@@ -2,6 +2,7 @@
 # coding=utf-8
 import sys
 import math
+import csv
 import eyemodel
 
 #   ^
@@ -20,7 +21,7 @@ import eyemodel
 # +Z = up
 x_cam, y_cam, z_cam = 0, -30, -10
  
-def createFrame(frame_name, eye_target):    
+def createFrame(frame_name, eye_target, render_samples):    
     with eyemodel.Renderer() as r:
         r.eye_target = eye_target
         r.camera_position = [x_cam, y_cam, z_cam]
@@ -48,31 +49,47 @@ def createFrame(frame_name, eye_target):
                 target = r.camera_target)
         ]
     
-        r.render_samples = 5
+        r.render_samples = render_samples
         r.render(f"{frame_name}.png", params=f"{frame_name}.m", attempts=1)
 
-def createFrames(frame_name, gaze_target):
+def createFrames(frame_name, gaze_target, render_samples):
     inter_ocular = 55
     # left eye
     x_eye = gaze_target[0] - inter_ocular
     target = [x_eye, gaze_target[1], gaze_target[2]]
-    createFrame(f"{frame_name}_left", target)
+    createFrame(f"{frame_name}_left", target, render_samples)
 
     # right eye, finally must be mirrored vertically 
     x_eye = -gaze_target[0] - inter_ocular
     target = [x_eye, gaze_target[1], gaze_target[2]]
 
-    createFrame(f"{frame_name}_right", target)
+    createFrame(f"{frame_name}_right", target, render_samples)
 
 
 x_eye, y_eye, z_eye = 0, -1000, 0
 
-if len(sys.argv) == 5:
+# create two frames with given target
+if len(sys.argv) == 6:
     frame_name = sys.argv[1]
     x_eye = int(sys.argv[2])
     y_eye = int(sys.argv[3])
     z_eye = int(sys.argv[4])
+    render_samples = int(sys.argv[5])
     
-    createFrames(frame_name, [x_eye, y_eye, z_eye])
+    createFrames(frame_name, [x_eye, y_eye, z_eye], render_samples)
 
-
+# creates frames from file
+if len(sys.argv) == 4:
+    input_file = sys.argv[1]
+    output_dir = sys.argv[2]
+    render_samples = int(sys.argv[3])
+    
+    with open(input_file, 'r', newline='') as tsvfile:
+        reader = csv.reader(tsvfile, delimiter='\t')
+        for row in reader:
+            if len(row) == 4:
+                frame_name = row[0]
+                x_eye = float(row[1])
+                y_eye = float(row[2])
+                z_eye = float(row[3])
+                createFrames(f"{output_dir}/{frame_name}", [x_eye, y_eye, z_eye], render_samples)

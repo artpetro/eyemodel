@@ -121,16 +121,22 @@ positions = readBallPositions(path)
 positions_ms = getBallPositionsMs(positions)     
 eye_positions_ms = getEyePositionsMs(positions_ms)
 eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
-print(len(eye_positions))
+print(f"{len(eye_positions)} frames created")
 #drawEyePositions(eye_positions, interval=MS_PER_FRAME)
 output_file = 'frames.tsv'
 
 if len(sys.argv) == 2:
     output_file = sys.argv[1]
+
+print(f"storing frames to {output_file} ...")
     
 with open(output_file, 'wt', newline='') as out_file:
     tsv_writer = csv.writer(out_file, delimiter='\t')
     for i, eye_position in enumerate(eye_positions):
-        #negate x for compatibility with eye model coordinates system
-        tsv_writer.writerow([f"frame_{i}", -eye_position[0]*1000, eye_position[1]*1000, eye_position[2]*1000])
-    
+        #negate x and y and swap y and z for compatibility with eye model coordinates system
+        x = -eye_position[0]*1000
+        y = -eye_position[2]*1000
+        z = eye_position[1]*1000
+        tsv_writer.writerow([f"frame_{i}", x, y, z])
+
+print("done")
