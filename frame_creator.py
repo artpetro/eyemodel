@@ -32,20 +32,29 @@ def createFrame(frame_name, eye_target, render_samples):
         r.focal_length = (200/2.5) / math.tan(45*math.pi/180 / 2)
         
         r.pupil_radius = 2
+        
+        sun = eyemodel.Light(
+                type="sun",
+                location = [25, -100, 1000],
+                strength = 20,
+                target = [0,0,0])
     
         r.lights = [
             eyemodel.Light(
-                type="sun",
-                location = [10, -10, 100],
-                strength = 20,
-                target = [0,0,0]),
-            eyemodel.Light(
-                strength = 5,
+                strength = 6,
                 location = [30, -50, -15],
                 target = r.camera_target),
             eyemodel.Light(
-                strength = 5,
+                strength = 6,
                 location = [-30, -50, -15],
+                target = r.camera_target),
+            eyemodel.Light(
+                strength = 6,
+                location = [0, -50, -15],
+                target = r.camera_target),
+            eyemodel.Light(
+                strength = 6,
+                location = [0, -30, 25],
                 target = r.camera_target)
         ]
     
