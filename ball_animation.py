@@ -9,11 +9,12 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-path = "c70f748e-7691-4fac-ad43-0142bfec92db.eyetrax"
 FPS = 200
 DECIMAL_PLACES = 5
 MS_PER_FRAME = 1000 / FPS
 EYE_SPEED = 1 / 50 # meters per millisecond
+
+SINE = (4460, 5785, 20)
     
 
 def readBallPositions(path):
@@ -32,12 +33,14 @@ def readBallPositions(path):
         return sorted(positions, key=lambda x: x[0])
         
            
-def drawBallPositions(positions):    
+def drawBallPositions(positions, traectory=None):    
     makeGPanel(-5, 5, -3, 3)
     setColor("blue")
     enableRepaint(False)
-    # sin 4400
-    for i in range(len(positions) - 1):
+    bounds = range(len(positions) - 1)
+    if traectory:
+        bounds = range(traectory[0], traectory[1])
+    for i in bounds:
         curr_pos = positions[i]
         next_pos = positions[i+1]
         dt = next_pos[0] - curr_pos[0]
@@ -51,7 +54,8 @@ def drawBallPositions(positions):
         # position of the ball
         pos(x_curr, y_curr)  
         fillCircle(z_curr/30)
-        repaint()  
+        repaint()
+        print(i) 
         time.sleep(dt)
         clear()
     keep()
@@ -71,13 +75,14 @@ def drawEyePositions(positions, interval=1):
 
     plt.show()  
    
-
-
-def getBallPositionsMs(positions):
+def getBallPositionsMs(positions, traectory=None):
     # TODO distance and movement
     # positions in every ms, dt = 0.001 seconds
     positions_ms = []
-    for i in range(len(positions) - 1):
+    bounds = range(len(positions) - 1)
+    if traectory:
+        bounds = range(traectory[0], traectory[1] + traectory[2])
+    for i in bounds:
         curr_pos = positions[i]
         next_pos = positions[i+1]
         dt = int((next_pos[0] - curr_pos[0]) * 1000)
@@ -116,27 +121,40 @@ def getEyePositionsMs(positions):
                     eye_positions[idx + 1][1] = eye_positions[idx][1] + ddy
                 
     return eye_positions
-    
-positions = readBallPositions(path)
-positions_ms = getBallPositionsMs(positions)     
-eye_positions_ms = getEyePositionsMs(positions_ms)
-eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
-print(f"{len(eye_positions)} frames created")
-#drawEyePositions(eye_positions, interval=MS_PER_FRAME)
-output_file = 'frames.tsv'
 
+def storeFrames(output_file, traectory=None):
+    positions = readBallPositions(path)
+    positions_ms = getBallPositionsMs(positions, traectory)     
+    eye_positions_ms = getEyePositionsMs(positions_ms)
+    eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
+    print(f"{len(eye_positions)} frames created")
+    #drawEyePositions(eye_positions, interval=MS_PER_FRAME)
+    
+    print(f"storing frames to {output_file} ...")
+        
+    with open(output_file, 'wt', newline='') as out_file:
+        tsv_writer = csv.writer(out_file, delimiter='\t')
+        for i, eye_position in enumerate(eye_positions):
+            #negate x and y and swap y and z for compatibility with eye model coordinates system
+            x = -eye_position[0]*1000
+            y = -eye_position[2]*1000
+            z = eye_position[1]*1000
+            tsv_writer.writerow([f"frame_{i}", x, y, z])
+    
+    print("done")
+    
+output_file = 'eye_positions_sine.tsv'
 if len(sys.argv) == 2:
     output_file = sys.argv[1]
 
-print(f"storing frames to {output_file} ...")
-    
-with open(output_file, 'wt', newline='') as out_file:
-    tsv_writer = csv.writer(out_file, delimiter='\t')
-    for i, eye_position in enumerate(eye_positions):
-        #negate x and y and swap y and z for compatibility with eye model coordinates system
-        x = -eye_position[0]*1000
-        y = -eye_position[2]*1000
-        z = eye_position[1]*1000
-        tsv_writer.writerow([f"frame_{i}", x, y, z])
+#storeFrames(output_file)
+path = "c70f748e-7691-4fac-ad43-0142bfec92db.eyetrax"
+path = 'bfa75fd7-7ed8-4922-a74c-fd0e3be1ffd3.eyetrax'
+positions = readBallPositions(path)
+#drawBallPositions(positions, SINE)
+positions_ms = getBallPositionsMs(positions, SINE)     
+eye_positions_ms = getEyePositionsMs(positions_ms)
+eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
+#drawEyePositions(eye_positions, interval=MS_PER_FRAME)
 
-print("done")
+storeFrames('eye_positions_sine.tsv', traectory=SINE)

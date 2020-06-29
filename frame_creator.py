@@ -19,7 +19,7 @@ import eyemodel
 # +X = left
 # +Y = back
 # +Z = up
-x_cam, y_cam, z_cam = 0, -30, -10
+x_cam, y_cam, z_cam = 10, -50, -30
  
 def createFrame(frame_name, eye_target, render_samples):    
     with eyemodel.Renderer() as r:
@@ -29,9 +29,9 @@ def createFrame(frame_name, eye_target, render_samples):
         r.eye_closedness = 0.0
         r.iris = "light"
         r.image_size = (200, 200)
-        r.focal_length = (200/2.5) / math.tan(45*math.pi/180 / 2)
+        r.focal_length = (200/1.5) / math.tan(45*math.pi/180 / 2)
         
-        r.pupil_radius = 2
+        r.pupil_radius = 1.5
         
         sun = eyemodel.Light(
                 type="sun",

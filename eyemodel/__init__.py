@@ -44,7 +44,7 @@ RENDER_LINE_RE = re.compile(r"""
     \s*\|\s*
     (?P<rig>[^,|]+) \s*,\s* (?P<layer>[^,|]+)       # Rig and layer name
     \s*\|\s*
-    Path\ Tracing\ Tile \s+
+    Rendered \s+
         (?P<tile>\d+)/(?P<tiles>\d+)                # Tile num
     \s*,\s*
     Sample \s+
@@ -269,6 +269,7 @@ class Renderer():
                                 "--enable-autoexec",                     # Automatic python script execution
                                 "--verbose", "0",                        # No debug output
                                 "--python", blender_script_file.name,    # Run the temporary blender script file
+                                "-E", "CYCLES",
                                 "-o", blender_outfile.name[:-4]+"####",  # Render output to temporary file
                                 "--render-format", render_format,        # Set render format (e.g. Jpeg) 
                                 "-noaudio",                              # Don't use audio
@@ -329,6 +330,7 @@ class Renderer():
                             else:
                                 if line[0] == "out":
                                     m = RENDER_LINE_RE.match(line[1])
+                                    #print(line[1])
                                     if m:
                                         tile = int(m.group("tile"))
                                         tiles = int(m.group("tiles"))
