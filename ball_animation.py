@@ -15,6 +15,7 @@ MS_PER_FRAME = 1000 / FPS
 EYE_SPEED = 1 / 50 # meters per millisecond
 
 SINE = (4460, 5785, 20)
+DIVERGE = (5785, 6750, 20)
     
 
 def readBallPositions(path):
@@ -68,6 +69,7 @@ def drawEyePositions(positions, interval=1):
     
     def animate(i):
         redDot.set_data(positions[i][0], positions[i][1])
+        print(i)
         return redDot,
 
     myAnimation = animation.FuncAnimation(fig, animate, frames=range(len(positions)), \
@@ -143,7 +145,7 @@ def storeFrames(output_file, traectory=None):
     
     print("done")
     
-output_file = 'eye_positions_sine.tsv'
+output_file = 'eye_positions.tsv'
 if len(sys.argv) == 2:
     output_file = sys.argv[1]
 
@@ -151,10 +153,11 @@ if len(sys.argv) == 2:
 path = "c70f748e-7691-4fac-ad43-0142bfec92db.eyetrax"
 path = 'bfa75fd7-7ed8-4922-a74c-fd0e3be1ffd3.eyetrax'
 positions = readBallPositions(path)
-#drawBallPositions(positions, SINE)
-positions_ms = getBallPositionsMs(positions, SINE)     
+#drawBallPositions(positions, traectory=DIVERGE)
+positions_ms = getBallPositionsMs(positions, traectory=DIVERGE)     
 eye_positions_ms = getEyePositionsMs(positions_ms)
 eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
 #drawEyePositions(eye_positions, interval=MS_PER_FRAME)
 
 storeFrames('eye_positions_sine.tsv', traectory=SINE)
+storeFrames('eye_positions_diverge.tsv', traectory=DIVERGE)
