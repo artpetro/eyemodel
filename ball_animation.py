@@ -14,8 +14,14 @@ DECIMAL_PLACES = 5
 MS_PER_FRAME = 1000 / FPS
 EYE_SPEED = 1 / 50 # meters per millisecond
 
+BIFLICKER = (100, 1000, 20)
+VERT_BIFLICKER = (1100, 1900, 20)
+HOPPING = (2000, 2900, 20)
+HOPPING_3D = (3000, 4400, 20)
 SINE = (4460, 5785, 20)
 DIVERGE = (5785, 6750, 20)
+
+VELO_HOR = (9000, 10000, 20)
     
 
 def readBallPositions(path):
@@ -74,6 +80,10 @@ def drawEyePositions(positions, interval=1):
 
     myAnimation = animation.FuncAnimation(fig, animate, frames=range(len(positions)), \
                                       interval=interval, blit=True, repeat=False)
+    
+    #Writer = animation.writers['ffmpeg']
+    #writer = Writer(fps=200, metadata=dict(artist='Me'), bitrate=1800)
+    #myAnimation.save('sine.mp4', writer=writer)
 
     plt.show()  
    
@@ -150,14 +160,19 @@ if len(sys.argv) == 2:
     output_file = sys.argv[1]
 
 #storeFrames(output_file)
-path = "c70f748e-7691-4fac-ad43-0142bfec92db.eyetrax"
+#path = "c70f748e-7691-4fac-ad43-0142bfec92db.eyetrax"
 path = 'bfa75fd7-7ed8-4922-a74c-fd0e3be1ffd3.eyetrax'
 positions = readBallPositions(path)
-#drawBallPositions(positions, traectory=DIVERGE)
-positions_ms = getBallPositionsMs(positions, traectory=DIVERGE)     
+#drawBallPositions(positions, traectory=SINE)
+positions_ms = getBallPositionsMs(positions, traectory=SINE)     
 eye_positions_ms = getEyePositionsMs(positions_ms)
 eye_positions = eye_positions_ms[0::int(MS_PER_FRAME)]
-#drawEyePositions(eye_positions, interval=MS_PER_FRAME)
+drawEyePositions(eye_positions, interval=MS_PER_FRAME)
 
-storeFrames('eye_positions_sine.tsv', traectory=SINE)
-storeFrames('eye_positions_diverge.tsv', traectory=DIVERGE)
+#storeFrames('eye_positions_biflicker.tsv', traectory=BIFLICKER)
+#storeFrames('eye_positions_vertical_biflicker.tsv', traectory=VERT_BIFLICKER)
+#storeFrames('eye_positions_hopping.tsv', traectory=HOPPING)
+#storeFrames('eye_positions_hopping_3d.tsv', traectory=HOPPING_3D)
+
+#storeFrames('eye_positions_sine.tsv', traectory=SINE)
+#storeFrames('eye_positions_diverge.tsv', traectory=DIVERGE)
